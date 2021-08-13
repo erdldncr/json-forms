@@ -174,6 +174,22 @@ const Home = () => {
   };
 
   useEffect(() => {
+    const getTemplate = () => {
+      axios
+        .get(
+          "https://mtmstaging.mywebtoolkit.com/api/v1/mtm-forms/proforma?id=1&username=ascott",
+          {
+            headers: {
+              Authorization: "Token a0f4e04feb4091725c00379dbed9fafb2d69500b",
+            },
+          }
+        )
+        .then((res) => {
+          console.log(res);
+        })
+        .catch((err) => console.log(err));
+    };
+
     setInitialData(axios.get("api") || {});
     setDisplayDataAsString(JSON.stringify(jsonformsData, null, 2));
   }, [jsonformsData]);
@@ -223,7 +239,7 @@ const Home = () => {
             <JsonForms
               schema={initialContactForm["schema"]}
               uischema={initialContactForm["uischema"]}
-              data={jsonformsData}
+              data={initialContactForm["data"]}
               renderers={renderers}
               cells={materialCells}
               onChange={({ errors, data }) => setJsonformsData(data)}
