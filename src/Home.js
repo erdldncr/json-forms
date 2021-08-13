@@ -3,7 +3,7 @@ import { JsonForms } from "@jsonforms/react";
 import Grid from "@material-ui/core/Grid";
 import Button from "@material-ui/core/Button";
 import Typography from "@material-ui/core/Typography";
-import logo from "./logo.svg";
+
 import "./App.css";
 import axios from "axios";
 import {
@@ -44,169 +44,48 @@ const renderers = [
   //register custom renderers
 ];
 
-const initialContactForm = {
-  schema: {
-    type: "object",
-    title: "Initial Contact",
-    properties: {
-      improveConfidence: {
-        type: "boolean",
-      },
-      improveMentalWellbeing: {
-        type: "boolean",
-      },
-      improvePhysicalWellbeing: {
-        type: "boolean",
-      },
-      haveSomeoneToChatWith: {
-        type: "boolean",
-      },
-      goalFocus: {
-        type: "string",
-      },
-      physicalHealthRating: {
-        type: "number",
-        maximum: 10,
-        minimum: 1,
-        description:
-          "With 1 being poor and 10 being excellent on a 1-10 scale, how would you rate your overall physical health?",
-      },
-      lifeSatisfactionRating: {
-        type: "number",
-        maximum: 10,
-        minimum: 1,
-        description:
-          "With 1 being not at all and 10 being completely on a 1-10 scale, how would you rate how satisfied you are with your life?",
-      },
-      notes: {
-        type: "string",
-      },
-    },
-  },
-  uischema: {
-    type: "Group",
-    elements: [
-      {
-        type: "Group",
-        elements: [
-          {
-            type: "Control",
-            scope: "#/properties/improveMentalWellbeing",
-          },
-          {
-            type: "Control",
-            scope: "#/properties/improvePhysicalWellbeing",
-          },
-          {
-            type: "Control",
-            scope: "#/properties/haveSomeoneToChatWith",
-          },
-          {
-            type: "Control",
-            scope: "#/properties/improveConfidence",
-          },
-        ],
-        label:
-          "What interests you about going out for a walk with a Move Mate?",
-      },
-      {
-        type: "Group",
-        elements: [
-          {
-            type: "Control",
-            scope: "#/properties/goalFocus",
-            options: {
-              multi: true,
-            },
-          },
-        ],
-        label:
-          "What would you like to focus on getting out of your walks over the next few months?",
-      },
-      {
-        type: "Group",
-        elements: [
-          {
-            type: "Control",
-            scope: "#/properties/physicalHealthRating",
-          },
-          {
-            type: "Control",
-            scope: "#/properties/lifeSatisfactionRating",
-          },
-        ],
-        label:
-          "The next few questions will ask about how you feel at the moment. This is so that we can understand if there are any changes for you as a result of being part of the Move Mates project.",
-      },
-      {
-        type: "Group",
-        elements: [
-          {
-            type: "Control",
-            scope: "#/properties/notes",
-            options: {
-              multi: true,
-            },
-          },
-        ],
-      },
-    ],
-    label: "Initial Contact",
-  },
-};
-const data = {
-  improveMentalWellbeing: true,
-};
-
 const Home = () => {
   const classes = useStyles();
   const [displayDataAsString, setDisplayDataAsString] = useState("");
-  const [initialData, setInitialData] = useState(data);
-  const [jsonformsData, setJsonformsData] = useState(data);
-
-  const getInitialData = async () => {
-    try {
-      const { data } = await axios.get("api");
-      setInitialData(data);
-    } catch (error) {
-      console.log(error);
-    }
-  };
+  const [initialData, setInitialData] = useState({});
+  const [jsonformsData, setJsonformsData] = useState({});
+  const [schema, setSchema] = useState({});
+  const [uiSchema, setUiSchema] = useState({});
 
   useEffect(() => {
     const getTemplate = () => {
       axios
         .get(
-          "https://mtmstaging.mywebtoolkit.com/api/v1/mtm-forms/proforma?id=1&username=ascott",
+          "http://mtmstaging.mywebtoolkit.com/api/v1/mtm-forms/proforma?id=1&username=ascott",
           {
             headers: {
               Authorization: "Token a0f4e04feb4091725c00379dbed9fafb2d69500b",
             },
           }
         )
-        .then((res) => {
-          console.log(res);
-        })
+        .then(
+          ({
+            data: {
+              formProforma: {
+                formSchemas: { schema, uiSchema },
+              },
+            },
+            formData: { data },
+          }) => {
+            console.log(data);
+          }
+        )
         .catch((err) => console.log(err));
     };
-
+    getTemplate();
     setInitialData(axios.get("api") || {});
     setDisplayDataAsString(JSON.stringify(jsonformsData, null, 2));
-  }, [jsonformsData]);
+  }, []);
 
   const clearData = () => {
     setJsonformsData({});
   };
-  const handleSubmit = () => {
-    if (Object.keys(initialData).length > 0) {
-      axios.put("api", {
-        ...jsonformsData,
-        uischema: initialContactForm["uischema"],
-      });
-    } else {
-      axios.post("api", jsonformsData);
-    }
-  };
+  const handleSubmit = () => {};
   return (
     <Fragment>
       <Grid
@@ -237,17 +116,15 @@ const Home = () => {
           </Typography>
           <div className={classes.demoform}>
             <JsonForms
-              schema={initialContactForm["schema"]}
-              uischema={initialContactForm["uischema"]}
-              data={initialContactForm["data"]}
+              schema={schema}
+              uischema={uiSchema}
+              data={initialData}
               renderers={renderers}
               cells={materialCells}
               onChange={({ errors, data }) => setJsonformsData(data)}
             />
           </div>
-          <Button onChange={handleSubmit}>
-            {Object.values(initialData).length > 0 ? "Update" : "Submit"}
-          </Button>
+          <Button onChange={handleSubmit}>Submit</Button>
         </Grid>
       </Grid>
     </Fragment>
