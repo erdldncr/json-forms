@@ -56,29 +56,20 @@ const Home = () => {
     const getTemplate = () => {
       axios
         .get(
-          "http://mtmstaging.mywebtoolkit.com/api/v1/mtm-forms/proforma?id=1&username=ascott",
+          "https://cors-anywhere.herokuapp.com/https://mtmstaging.mywebtoolkit.com/api/v1/my-details?username=ascott",
           {
             headers: {
               Authorization: "Token a0f4e04feb4091725c00379dbed9fafb2d69500b",
             },
           }
         )
-        .then(
-          ({
-            data: {
-              formProforma: {
-                formSchemas: { schema, uiSchema },
-              },
-            },
-            formData: { data },
-          }) => {
-            console.log(data);
-          }
-        )
+        .then(({ data }) => {
+          console.log(data);
+        })
         .catch((err) => console.log(err));
     };
     getTemplate();
-    setInitialData(axios.get("api") || {});
+    // setInitialData(axios.get("api") || {});
     setDisplayDataAsString(JSON.stringify(jsonformsData, null, 2));
   }, []);
 
